@@ -1,0 +1,79 @@
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ nano uppercase.S
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make build
+riscv64-unknown-elf-as -march=rv32im -mabi=ilp32 uppercase.S -o uppercase.o
+make: riscv64-unknown-elf-as: No such file or directory
+make: *** [Makefile:6: build] Error 127
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ sudo apt update
+[sudo] password for quocvuong: 
+Hit:1 http://vn.archive.ubuntu.com/ubuntu plucky InRelease
+Hit:2 http://vn.archive.ubuntu.com/ubuntu plucky-updates InRelease             
+Hit:3 http://vn.archive.ubuntu.com/ubuntu plucky-backports InRelease           
+Hit:4 https://packages.microsoft.com/repos/code stable InRelease               
+Hit:5 http://security.ubuntu.com/ubuntu plucky-security InRelease            
+5 packages can be upgraded. Run 'apt list --upgradable' to see them.
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ sudo apt install binutils-riscv64-unknown-elf gcc-riscv64-unknown-elf
+Installing:                     
+  binutils-riscv64-unknown-elf  gcc-riscv64-unknown-elf
+
+Summary:
+  Upgrading: 0, Installing: 2, Removing: 0, Not Upgrading: 5
+  Download size: 74.6 MB
+  Space needed: 403 MB / 79.7 GB available
+
+Ign:1 http://vn.archive.ubuntu.com/ubuntu plucky/universe amd64 binutils-riscv64-unknown-elf amd64 2.43.1-4ubuntu1+7
+Get:2 http://vn.archive.ubuntu.com/ubuntu plucky/universe amd64 gcc-riscv64-unknown-elf amd64 14.2.0+19 [71.2 MB]
+Get:1 http://vn.archive.ubuntu.com/ubuntu plucky/universe amd64 binutils-riscv64-unknown-elf amd64 2.43.1-4ubuntu1+7 [3,318 kB]                                   
+Fetched 74.6 MB in 2min 5s (598 kB/s)                                                                                                                             
+Selecting previously unselected package binutils-riscv64-unknown-elf.
+(Reading database ... 188167 files and directories currently installed.)
+Preparing to unpack .../binutils-riscv64-unknown-elf_2.43.1-4ubuntu1+7_amd64.deb ...
+Unpacking binutils-riscv64-unknown-elf (2.43.1-4ubuntu1+7) ...
+Selecting previously unselected package gcc-riscv64-unknown-elf.
+Preparing to unpack .../gcc-riscv64-unknown-elf_14.2.0+19_amd64.deb ...
+Unpacking gcc-riscv64-unknown-elf (14.2.0+19) ...
+Setting up binutils-riscv64-unknown-elf (2.43.1-4ubuntu1+7) ...
+Setting up gcc-riscv64-unknown-elf (14.2.0+19) ...
+Processing triggers for man-db (2.13.0-1) ...
+Processing triggers for libc-bin (2.41-6ubuntu1.2) ...
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ riscv64-unknown-elf-as --version
+GNU assembler (2.43.1-4ubuntu1+7) 2.43.1
+Copyright (C) 2024 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or later.
+This program has absolutely no warranty.
+This assembler was configured for a target of `riscv64-unknown-elf'.
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make build
+riscv64-unknown-elf-as -march=rv32im -mabi=ilp32 uppercase.S -o uppercase.o
+riscv64-unknown-elf-ld -A rv32 --oformat elf32-littleriscv -Tdata=0x2000 uppercase.o -o uppercase.bin
+riscv64-unknown-elf-objdump -d uppercase.bin > uppercase.disasm.s
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make start
+spike -p1 -m0:0x1000,0x1000:0x1000,0x2000:0x1000,0x10000:0x1000 --isa=rv32im -d uppercase.bin
+devices at [0, 1000) and [0, 1000) overlap
+make: *** [Makefile:11: start] Error 255
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ nano Makefile
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make build
+riscv64-unknown-elf-as -march=rv32im -mabi=ilp32 uppercase.S -o uppercase.o
+riscv64-unknown-elf-ld -A rv32 --oformat elf32-littleriscv -Ttext=0x10000 -Tdata=0x2000 uppercase.o -o uppercase.bin
+riscv64-unknown-elf-objdump -d uppercase.bin > uppercase.disasm.s
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make start
+spike -p1 -m0x2000:0x1000,0x10000:0x1000 --isa=rv32im -d uppercase.bin
+Access exception occurred while loading payload uppercase.bin:
+Memory address 0x1000 is invalid
+make: *** [Makefile:11: start] Error 255
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ nano link.ld
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ nano Makefile
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ rm uppercase.bin uppercase.o
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make build
+riscv64-unknown-elf-as -march=rv32im -mabi=ilp32 uppercase.S -o uppercase.o
+riscv64-unknown-elf-ld -A rv32 --oformat elf32-littleriscv -T link.ld uppercase.o -o uppercase.bin
+riscv64-unknown-elf-objdump -d uppercase.bin > uppercase.disasm.s
+quocvuong@quocvuong:~/SoCs/RISC-V_Assembly_Resource-20251211$ make start
+spike -p1 -m0x2000:0x1000,0x10000:0x1000 --isa=rv32im -d uppercase.bin
+(spike) str 0 2000 
+Hello world!
+(spike) rs 1000
+:
+(spike) str 0 2000
+HELLO WORLD!
+(spike)    
+
